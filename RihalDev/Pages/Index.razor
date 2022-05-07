@@ -1,0 +1,129 @@
+﻿@page "/"
+
+@using RihalDev.Data
+@using RihalDev.Models
+@using Microsoft.EntityFrameworkCore
+
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+<link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Sahar Alhabsi <a href="https://saharalhabsi.github.io/sa7ar/">Profile</a>.</p>
+</div>
+<br />
+<div class="card">
+    <div class="card-body">
+
+        <b> Students Avrage Age:</b> 
+        @avg Years Old
+    </div>
+</div>
+<h1>Students Table</h1>
+<div class="row">
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID(PK)</th>
+                    <th>Name</th>
+                    <th>Birthday Date</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @if (students != null)
+                {
+                    @foreach (Students student in students)
+                    {
+                        <tr>
+                            <td>@student.Id</td>
+                            <td>@student.name</td>
+                            <td>@student.birthDate</td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<h1>Classes Table</h1>
+<div class="row">
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+
+                    <th>Class Name</th>
+                    <th>Count</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @if (students != null)
+                {
+                    @foreach (var clas in students.GroupBy(s => s.Classes.name))
+                    {
+                        <tr>
+
+                            <td>@clas.Key</td>
+                            <td>@clas.Count()</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<h1>Countries Table</h1>
+
+<div class="row">
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+
+                    <th>Country Name</th>
+                    <th>Number of Students </th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @if (students != null)
+                {
+                    @foreach (var country in students.GroupBy(s => s.Countries.name))
+                    {
+                        <tr>
+
+                            <td>@country.Key</td>
+                            <td>@country.Count()</td>
+
+
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code{
+    int avg = 0;
+
+    [Inject] private DataContext DataContext { get; set; }
+    private List<Students> students = new List<Students>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        students = await DataContext.Students
+                   .Include(s => s.Classes)
+                   .Include(s => s.Countries)
+                   .ToListAsync();
+        avg = (int)System.Math.Round((students.Average(s => (DateTime.Now - s.birthDate).TotalDays) / 365), 2);
+
+    }
+
+
+}
